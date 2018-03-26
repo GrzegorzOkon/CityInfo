@@ -16,19 +16,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
-/*public class Main {
-
-	public static void main(String[] args) {
-		Service s = new Service("Poland");
-	    String weatherJson = s.getWeather("Warsaw");
-	    Double rate1 = s.getRateFor("USD");
-	    Double rate2 = s.getNBPRate();
-	    // ...
-	    // czêœæ uruchamiaj¹ca GUI
-
-	}
-
-}*/
 
 public class Main extends Application { 
     private Scene scena; // scena
@@ -37,7 +24,7 @@ public class Main extends Application {
     private GridPane kontenerSiatki;
     private HBox kontenerPrzyciskow;
     
-    private ObservableList<String> countries, polishCities, indiaCities, israelCities;
+    private ObservableList<String> kraje, polskieMiasta, hiszpañskieMiasta, amerykañskieMiasta;
     private ComboBox<String> poleKrajów, poleMiast, poleWalut;
     private TextArea poleWyszukiwania;
     private Button pobierzPogodê, pobierzKursWaluty, pobierzKursNBP, pobierzOpis;
@@ -49,27 +36,27 @@ public class Main extends Application {
         kontenerGlowny = new BorderPane();
         kontenerGlowny.setPadding(new Insets(15, 15, 15, 15));  //tworzy odstêp wokó³ konteneru
         
-        countries = FXCollections.observableArrayList(
+        kraje = FXCollections.observableArrayList(
         		"Poland",
-        		"India",
-        		"Israel");
+        		"Spain",
+        		"USA");
 
-        polishCities = FXCollections.observableArrayList(
+        polskieMiasta = FXCollections.observableArrayList(
                 "Cracow",
                 "Poznañ",
                 "Warsaw");
 
-        indiaCities = FXCollections.observableArrayList(
-                "StatesGermany1",
-                "StatesGermany2",
-                "StatesGermany3");
+        hiszpañskieMiasta = FXCollections.observableArrayList(
+        		"Barcelona",
+                "Madrid",
+                "Seville");
 
-        israelCities = FXCollections.observableArrayList(
-                "StatesIsrael1",
-                "StatesIsrael2",
-                "StatesIsrael3");
+        amerykañskieMiasta = FXCollections.observableArrayList(
+                "Chicago",
+                "New York",
+                "Washington");
         
-        poleKrajów = new ComboBox(countries);
+        poleKrajów = new ComboBox(kraje);
         
         poleMiast = new ComboBox();
         poleKrajów.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
@@ -77,16 +64,15 @@ public class Main extends Application {
             public void changed(ObservableValue ov, Object t, Object t1) {
 
                 switch (t1.toString()) {
-                    case "India":
-                    	poleMiast.setItems(indiaCities);
+                	case "Poland":
+                    	poleMiast.setItems(polskieMiasta);
                         break;
-                   case "Poland":
-                	   poleMiast.setItems(polishCities);
+                	case "Spain":
+                		poleMiast.setItems(hiszpañskieMiasta);
                         break;
-                   case "Israel":
-                	   poleMiast.setItems(israelCities);
+                    case "USA":
+                	   poleMiast.setItems(amerykañskieMiasta);
                        break;
-
                 }
             }
         });
@@ -104,11 +90,11 @@ public class Main extends Application {
         kontenerSiatki.setVgap(4);
         kontenerSiatki.setHgap(8);
         kontenerSiatki.setPadding(new Insets(5, 5, 5, 5));
-        kontenerSiatki.add(new Label("Country: "), 0, 0);
+        kontenerSiatki.add(new Label("Kraj: "), 0, 0);
         kontenerSiatki.add(poleKrajów, 0, 1);
-        kontenerSiatki.add(new Label("City: "), 1, 0);
+        kontenerSiatki.add(new Label("Miasto: "), 1, 0);
         kontenerSiatki.add(poleMiast, 1, 1);
-        kontenerSiatki.add(new Label("Currency: "), 4, 0);
+        kontenerSiatki.add(new Label("Waluta: "), 4, 0);
         kontenerSiatki.add(poleWalut, 4, 1); 
         
         kontenerSiatki.setPadding(new Insets(0, 0, 10, 0));  // tworzy odstêp pod kontenerem
@@ -123,7 +109,7 @@ public class Main extends Application {
         
         kontenerPrzyciskow = new HBox(16);
         
-        pobierzPogodê = new Button("Get weather");
+        pobierzPogodê = new Button("Pobierz pogodê");
         pobierzKursWaluty = new Button("Get rate for");
         pobierzKursNBP = new Button("Get NBP rate");
         pobierzOpis = new Button("Get description");
@@ -133,16 +119,11 @@ public class Main extends Application {
         kontenerPrzyciskow.getChildren().add(pobierzKursNBP);
         kontenerPrzyciskow.getChildren().add(pobierzOpis);
         
-		// Przypisanie dzia³ania do przycisku sprawdzenia w centrali
-        /*SprawdzWCentrali.setOnAction((event) -> {		    
-            if (opcjaNumerW³asny.isSelected() == true) {
-            	kontroler.wyszukajWCentraliNrAkt(walidujDane());
-            } else if (opcjaNumerSystemowy.isSelected() == true) {
-            	kontroler.wyszukajWCentraliIdDok(walidujDane());
-            } else {
-            	kontroler.wyszukajWCentraliSymDok(walidujDane());
-            }         	
-		});*/
+        pobierzPogodê.setOnAction((event) -> {	
+        	if (poleMiast.getSelectionModel().isEmpty() == false) {
+        		wyœwietlRaport(new Service().getWeather(poleMiast.getSelectionModel().getSelectedItem()));
+        	}
+		});
         
 		// Przypisanie dzia³ania do przycisku sprawdzenia we wszystkich izbach
         /*SprawdzLokalnie.setOnAction((event) -> {		    
@@ -192,7 +173,8 @@ public class Main extends Application {
 
     // =============================================================================
     
-	public synchronized void displayReport() {
-
+	public void wyœwietlRaport(String raport) {
+		poleWyszukiwania.clear();
+		poleWyszukiwania.appendText(raport);
 	}
 }
