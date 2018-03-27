@@ -18,7 +18,8 @@ import javafx.stage.Stage;
 
 
 public class Main extends Application { 
-    private Scene scena; // scena
+	
+    private Scene scena; 
     
     private BorderPane kontenerGlowny, konternerDolny;
     private GridPane kontenerSiatki;
@@ -32,7 +33,8 @@ public class Main extends Application {
     
     // =============================================================================
     
-    private void prepareScene(Stage primaryStage) {    	
+    private void prepareScene(Stage primaryStage) {    
+    	
         kontenerGlowny = new BorderPane();
         kontenerGlowny.setPadding(new Insets(15, 15, 15, 15));  //tworzy odstêp wokó³ konteneru
         
@@ -78,12 +80,12 @@ public class Main extends Application {
         });
         
         poleWalut = new ComboBox();
-        poleWalut.getItems().addAll(
-                "--",
-                "--",
-                "--",
-                "--",
-                "--"  
+        poleWalut.getItems().addAll(                
+                "CHF",
+                "CZK",
+                "JPY",
+                "PLN",
+                "USD"     
         	);
         
         kontenerSiatki = new GridPane();
@@ -110,7 +112,7 @@ public class Main extends Application {
         kontenerPrzyciskow = new HBox(16);
         
         pobierzPogodê = new Button("Pobierz pogodê");
-        pobierzKursWaluty = new Button("Get rate for");
+        pobierzKursWaluty = new Button("Pobierz kurs dla");
         pobierzKursNBP = new Button("Get NBP rate");
         pobierzOpis = new Button("Get description");
         
@@ -125,15 +127,11 @@ public class Main extends Application {
         	}
 		});
         
-		// Przypisanie dzia³ania do przycisku sprawdzenia we wszystkich izbach
-        /*SprawdzLokalnie.setOnAction((event) -> {		    
-            if (opcjaNumerW³asny.isSelected() == true) {
-            	kontroler.wyszukajLokalnieNrAkt(walidujDane());
-            } else if (opcjaNumerSystemowy.isSelected() == true) {
-            } else {	
-            	kontroler.wyszukajLokalnieSymDok(walidujDane());
-            }         	
-		});*/
+        pobierzKursWaluty.setOnAction((event) -> {
+        	if (poleWalut.getSelectionModel().isEmpty() == false) {
+        		wyœwietlRaport(new Service().getRateFor(poleWalut.getSelectionModel().getSelectedItem()).toString());
+        	}
+		});
         
 		// Przypisuje czyszczenie pól do przycisku Wyczyœæ
         /*Wyczysc.setOnAction((event) -> {		    
@@ -174,6 +172,7 @@ public class Main extends Application {
     // =============================================================================
     
 	public void wyœwietlRaport(String raport) {
+		
 		poleWyszukiwania.clear();
 		poleWyszukiwania.appendText(raport);
 	}
