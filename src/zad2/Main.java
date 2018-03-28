@@ -112,9 +112,9 @@ public class Main extends Application {
         kontenerPrzyciskow = new HBox(16);
         
         pobierzPogodê = new Button("Pobierz pogodê");
-        pobierzKursWaluty = new Button("Pobierz kurs dla");
-        pobierzKursNBP = new Button("Get NBP rate");
-        pobierzOpis = new Button("Get description");
+        pobierzKursWaluty = new Button("Pobierz kurs waluty");
+        pobierzKursNBP = new Button("Pobierz kurs NBP");
+        pobierzOpis = new Button("Pobierz opis");
         
         kontenerPrzyciskow.getChildren().add(pobierzPogodê);
         kontenerPrzyciskow.getChildren().add(pobierzKursWaluty);
@@ -129,23 +129,26 @@ public class Main extends Application {
         
         pobierzKursWaluty.setOnAction((event) -> {
         	if (poleWalut.getSelectionModel().isEmpty() == false) {
-        		wyœwietlRaport(new Service().getRateFor(poleWalut.getSelectionModel().getSelectedItem()).toString());
+        		Double kursWaluty = new Service().getRateFor(poleWalut.getSelectionModel().getSelectedItem());
+        		
+        		if (kursWaluty != null) {
+        			wyœwietlRaport(kursWaluty.toString());
+        		}
         	}
 		});
         
-		// Przypisuje czyszczenie pól do przycisku Wyczyœæ
-        /*Wyczysc.setOnAction((event) -> {		    
-        	poleWyszukiwania.clear();
-        	poleRaportuDlaHelpDesku.clear();
-        	poleRaportuDlaAdministratora.clear();
-        	poleDziennikaZdarzeñ.clear();
-		});*/
+        pobierzKursNBP.setOnAction((event) -> {		    
+        	if (poleKrajów.getSelectionModel().isEmpty() == false && !poleKrajów.getSelectionModel().getSelectedItem().equals("Poland")) {
+        		Double kursNBP = new Service(poleKrajów.getSelectionModel().getSelectedItem()).getNBPRate();
+        		
+        		if (kursNBP != null) {
+        			wyœwietlRaport(kursNBP.toString());
+        		}
+        	}
+		});
         
         konternerDolny.setRight(kontenerPrzyciskow);
         kontenerGlowny.setBottom(konternerDolny);
-        
-        /*poleRaportuDlaAdministratora = new TextArea();
-        poleRaportuDlaAdministratora.setEditable(false);*/
         
         scena = new Scene(kontenerGlowny, 800, 600);
     }

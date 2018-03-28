@@ -1,6 +1,8 @@
 package zad2;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,6 +18,22 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 public class Service {
+	
+	String kraj = null;
+	
+	Map<String, String> waluty = new HashMap<String, String>() {	
+		{
+			put("Poland", "PLN");
+			put("Spain", "EUR");
+			put("USA", "USD");
+		}
+	};
+	
+	Service() {}
+	
+	Service(String kraj) {
+		this.kraj = kraj;
+	}
 	
 	/*
 	 * Zwraca informacjê o pogodzie w podanym mieœcie danego kraju w formacie JSON 
@@ -45,7 +63,7 @@ public class Service {
 	 * Zwraca informacjê o kursie wymiany waluty kraju wobec podanej przez u¿ytkownika waluty
 	 * (serwis fixer.io w darmowej wersji udostêpnia jedynie kurs euro)
 	 * 
-	 * @param kod_waluty jest nazw¹ waluty dla której pobierzemy kurs
+	 * @param kod_waluty jest kodem waluty dla której pobierzemy kurs
 	 * 
 	 * @return otrzymana aktualna wartoœæ kursu wybranej waluty w stosunku do euro
 	 */
@@ -73,8 +91,39 @@ public class Service {
 		return kursWaluty;
 	}
 	
+	/*
+	 * Zwraca informacjê o kursie wymiany waluty wybranego kraju wobec polskiej z³otówki
+	 * 
+	 * @return otrzymana aktualna wartoœæ kursu waluty wybranego kraju w stosunku do PLN
+	 */
 	Double getNBPRate() {
 		
-		return null;
+		String[] BASE_URL = {"http://www.nbp.pl/kursy/kursya.html", "http://www.nbp.pl/kursy/kursyb.html"};
+		Double kursWaluty = null;
+		
+		for (int i = 0; i < 2; i++) {
+			
+			HttpGet get = new HttpGet(BASE_URL[i]);
+		
+			try (CloseableHttpClient httpClient = HttpClients.createDefault(); CloseableHttpResponse response =  httpClient.execute(get);) {
+
+				HttpEntity entity = response.getEntity();
+				String exchangeRates = EntityUtils.toString(entity);
+
+				int indeksKoduWaluty = exchangeRates.indexOf(waluty.get(kraj));
+				
+				if (indeksKoduWaluty != -1) {
+            	
+					int indeksKursu = exchangeRates.indexOf(">", indeksKoduWaluty + 10) + 1;
+					kursWaluty = Double.valueOf(exchangeRates.substring(indeksKursu, indeksKursu + 6).replace(',', '.'));
+					break;
+				} 
+			} catch (IOException e) {
+        	
+				e.printStackTrace();
+			} 
+		}
+		
+		return kursWaluty;
 	}
 }
