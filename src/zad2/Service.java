@@ -29,9 +29,9 @@ public class Service {
 		}
 	};
 	
-	Service() {}
+	public Service() {}
 	
-	Service(String kraj) {
+	public Service(String kraj) {
 		this.kraj = kraj;
 	}
 	
@@ -42,21 +42,23 @@ public class Service {
 	 * 
 	 * @return otrzymany obiekt JSON zapisany w formie tekstowej lub null w przypadku wyst¹pienia b³êdu IOException lub JSONException
 	 */
-	String getWeather(String miasto) {
+	public String getWeather(String miasto) {
 		
 		OpenWeatherMap owm = new OpenWeatherMap(OpenWeatherMap.Units.METRIC, "e1062b0ac1617d837933b2d9d1801f80");
+		String JSON = null;
 		
 		try {
+			CurrentWeather aktualnaPogoda = owm.currentWeatherByCityName(miasto);         
 			
-			CurrentWeather aktualnaPogoda = owm.currentWeatherByCityName(miasto);      
-		        
-		    return aktualnaPogoda.getRawResponse();
+			if (aktualnaPogoda.hasBaseStation()) {
+				JSON = aktualnaPogoda.getRawResponse();
+			}
 		} catch (IOException | JSONException e) {
 			
 		    e.printStackTrace();
 		}
 		    
-		return null;
+		return JSON;
 	}
 	
 	/*
@@ -101,7 +103,7 @@ public class Service {
 		String[] BASE_URL = {"http://www.nbp.pl/kursy/kursya.html", "http://www.nbp.pl/kursy/kursyb.html"};
 		Double kursWaluty = null;
 		
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < 2 && kursWaluty == null; i++) {
 			
 			HttpGet get = new HttpGet(BASE_URL[i]);
 		
@@ -116,7 +118,6 @@ public class Service {
             	
 					int indeksKursu = exchangeRates.indexOf(">", indeksKoduWaluty + 10) + 1;
 					kursWaluty = Double.valueOf(exchangeRates.substring(indeksKursu, indeksKursu + 6).replace(',', '.'));
-					break;
 				} 
 			} catch (IOException e) {
         	
