@@ -1,40 +1,62 @@
 package zad2;
 
 
+import java.awt.BorderLayout;
+
+import javax.swing.JButton;
+
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.JFXPanel;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 
 public class Main extends Application { 
 	
     private Scene scena; 
-    
-    private BorderPane kontenerGlowny, konternerDolny;
+    private TabPane kontenerZakladek; 
+    private Tab zakladka0, zakladka1;
+    private BorderPane kontenerGlowny, konternerDolny, kontenerPrzegl¹darki;
     private GridPane kontenerSiatki;
     private HBox kontenerPrzyciskow;
+    private JFXPanel jfxPanel; 
     
     private ObservableList<String> kraje, polskieMiasta, hiszpañskieMiasta, amerykañskieMiasta;
     private ComboBox<String> poleKrajów, poleMiast, poleWalut;
     private TextArea poleWyszukiwania;
     private Button pobierzPogodê, pobierzKursWaluty, pobierzKursNBP, pobierzOpis;
 
-    
+    private WebView przegl¹darka;  
+    private WebEngine silnikStron;   
+
     // =============================================================================
     
     private void prepareScene(Stage primaryStage) {    
+    	
+        kontenerZakladek = new TabPane();
+        kontenerZakladek.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
+
+        zakladka0 = new Tab("Wyszukiwanie");
+        zakladka1 = new Tab("Wikipedia");
+        
+        kontenerZakladek.getTabs().addAll(zakladka0, zakladka1);
     	
         kontenerGlowny = new BorderPane();
         kontenerGlowny.setPadding(new Insets(15, 15, 15, 15));  //tworzy odstêp wokó³ konteneru
@@ -148,10 +170,30 @@ public class Main extends Application {
         	}
 		});
         
+        pobierzOpis.setOnAction((event) -> {		    
+        	if (poleMiast.getSelectionModel().isEmpty() == false) {
+        		String adresStrony = new Service().getWikiDescription(poleMiast.getSelectionModel().getSelectedItem());
+                
+        		if (adresStrony != null) {
+        			silnikStron.load(adresStrony);
+        		}
+        	}
+		});
+         
         konternerDolny.setRight(kontenerPrzyciskow);
         kontenerGlowny.setBottom(konternerDolny);
         
-        scena = new Scene(kontenerGlowny, 800, 600);
+        zakladka0.setContent(kontenerGlowny); 
+        
+        kontenerPrzegl¹darki = new BorderPane();
+
+        przegl¹darka = new WebView();
+        silnikStron = przegl¹darka.getEngine();
+   
+        kontenerPrzegl¹darki.setCenter(przegl¹darka);
+        zakladka1.setContent(kontenerPrzegl¹darki); 
+        
+        scena = new Scene(kontenerZakladek, 800, 600);
     }
     
     // =============================================================================

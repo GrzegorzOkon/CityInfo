@@ -7,6 +7,7 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import javafx.collections.FXCollections;
 import net.aksingh.owmjapis.CurrentWeather;
 import net.aksingh.owmjapis.OpenWeatherMap;
 
@@ -26,6 +27,20 @@ public class Service {
 			put("Poland", "PLN");
 			put("Spain", "EUR");
 			put("USA", "USD");
+		}
+	};
+	
+	Map<String, String> miasta = new HashMap<String, String>() {	
+		{
+			put("Barcelona", "Barcelona");
+			put("Chicago", "Chicago");
+			put("Cracow", "Kraków");
+			put("Madrid", "Madryt");
+			put("New York", "Nowy_Jork");
+			put("Poznañ", "Poznañ");
+			put("Seville", "Sewilla");
+			put("Warsaw", "Warszawa");
+			put("Washington", "Waszyngton");
 		}
 	};
 	
@@ -50,7 +65,7 @@ public class Service {
 		try {
 			CurrentWeather aktualnaPogoda = owm.currentWeatherByCityName(miasto);         
 			
-			if (aktualnaPogoda.hasBaseStation()) {
+			if (aktualnaPogoda.hasBaseStation()) {	//czy znalaz³ pogodê dla podanej lokacji
 				JSON = aktualnaPogoda.getRawResponse();
 			}
 		} catch (IOException | JSONException e) {
@@ -94,9 +109,9 @@ public class Service {
 	}
 	
 	/*
-	 * Zwraca informacjê o kursie wymiany waluty wybranego kraju wobec polskiej z³otówki
+	 * Zwraca informacjê o kursie NBP z³otego wobec waluty podanego kraju
 	 * 
-	 * @return otrzymana aktualna wartoœæ kursu waluty wybranego kraju w stosunku do PLN
+	 * @return otrzymana aktualna wartoœæ NBP z³otego wobec waluty podanego kraju
 	 */
 	Double getNBPRate() {
 		
@@ -126,5 +141,16 @@ public class Service {
 		}
 		
 		return kursWaluty;
+	}
+	
+	public String getWikiDescription(String miasto) {
+		
+		String miastoPoPolsku = miasta.get(miasto);
+		
+		if (miastoPoPolsku != null) {
+			return "https://pl.wikipedia.org/wiki/" + miastoPoPolsku;
+		}
+		
+		return miastoPoPolsku;
 	}
 }
