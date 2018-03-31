@@ -5,6 +5,8 @@ import java.awt.BorderLayout;
 
 import javax.swing.JButton;
 
+import org.json.JSONObject;
+
 import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -146,13 +148,14 @@ public class Main extends Application {
         
         pobierzPogodê.setOnAction((event) -> {	
         	if (poleMiast.getSelectionModel().isEmpty() == false) {
-        		wyœwietlRaport(new Service().getWeather(poleMiast.getSelectionModel().getSelectedItem()));
+        		wyœwietlRaport(sformatujPogodê(new Service().getWeather(poleMiast.getSelectionModel().getSelectedItem())));
+        		//wyœwietlRaport(new Service().getWeather(poleMiast.getSelectionModel().getSelectedItem()));
         	}
 		});
         
         pobierzKursWaluty.setOnAction((event) -> {
-        	if (poleWalut.getSelectionModel().isEmpty() == false) {
-        		Double kursWaluty = new Service().getRateFor(poleWalut.getSelectionModel().getSelectedItem());
+        	if (poleKrajów.getSelectionModel().isEmpty() == false && poleWalut.getSelectionModel().isEmpty() == false) {
+        		Double kursWaluty = new Service(poleKrajów.getSelectionModel().getSelectedItem()).getRateFor(poleWalut.getSelectionModel().getSelectedItem());
         		
         		if (kursWaluty != null) {
         			wyœwietlRaport(kursWaluty.toString());
@@ -216,6 +219,28 @@ public class Main extends Application {
     }
 
     // =============================================================================
+    
+    public String sformatujPogodê(String tekstNiesformatowany) {
+    	
+    	String tekstSformatowany = "";
+    	
+    	try {
+    	
+    			JSONObject jsonObj = new JSONObject(tekstNiesformatowany);
+    			
+    			if (!jsonObj.isNull("main")) {
+    				
+    				tekstSformatowany += "Temperatura: " + jsonObj.getJSONObject("main").get("temp") + "\n";
+    				tekstSformatowany += "Temperatura minimalna: " + jsonObj.getJSONObject("main").get("temp_min") + "\n";
+    				tekstSformatowany += "Temperatura maksymalna: " + jsonObj.getJSONObject("main").get("temp_max") + "\n";
+    				tekstSformatowany += "Wilgotnoœæ: " + jsonObj.getJSONObject("main").get("humidity") + "\n";
+    				tekstSformatowany += "Ciœnienie: " + jsonObj.getJSONObject("main").get("pressure");
+    			}
+
+    	} catch (Exception ex) {}
+    	
+    	return tekstSformatowany;
+    }
     
 	public void wyœwietlRaport(String raport) {
 		

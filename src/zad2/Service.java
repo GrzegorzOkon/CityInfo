@@ -72,7 +72,7 @@ public class Service {
 			
 		    e.printStackTrace();
 		}
-		    
+		
 		return JSON;
 	}
 	
@@ -90,7 +90,7 @@ public class Service {
 		String ENDPOINT = "latest";
 		String ACCESS_KEY = "ff25386cdc086b897f6078b87df4c109";	
 
-		HttpGet get = new HttpGet(BASE_URL + ENDPOINT + "?access_key=" + ACCESS_KEY + "&base=" + "EUR" + "&symbols=" + kod_waluty);
+		HttpGet get = new HttpGet(BASE_URL + ENDPOINT + "?access_key=" + ACCESS_KEY + "&base=" + waluty.get(kraj) + "&symbols=" + kod_waluty);
 		
 		Double kursWaluty = null;
 		
@@ -99,7 +99,9 @@ public class Service {
             HttpEntity entity = response.getEntity();
             JSONObject exchangeRates = new JSONObject(EntityUtils.toString(entity));
 
-            kursWaluty =  exchangeRates.getJSONObject("rates").getDouble(kod_waluty);
+            if (!exchangeRates.isNull("rates")) {
+            	kursWaluty =  exchangeRates.getJSONObject("rates").getDouble(kod_waluty);
+            }
         } catch (IOException | JSONException e) {
         	
             e.printStackTrace();
