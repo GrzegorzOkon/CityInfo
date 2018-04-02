@@ -131,7 +131,7 @@ public class Service {
 
 				int indeksKoduWaluty = exchangeRates.indexOf(waluty.get(kraj));
 				
-				if (indeksKoduWaluty != -1) {
+				if (indeksKoduWaluty != -1 && !kraj.equals("Poland")) {
             	
 					int indeksKursu = exchangeRates.indexOf(">", indeksKoduWaluty + 10) + 1;
 					kursWaluty = Double.valueOf(exchangeRates.substring(indeksKursu, indeksKursu + 6).replace(',', '.'));

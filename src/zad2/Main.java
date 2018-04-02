@@ -32,16 +32,21 @@ import javafx.stage.Stage;
 
 public class Main extends Application { 
 	
+	private static Service s;
+	private static String weatherJson;
+	private static Double rate1;
+	private static Double rate2;
+	private static String wikiAddress;
+	
     private Scene scena; 
     private TabPane kontenerZakladek; 
     private Tab zakladka0, zakladka1;
     private BorderPane kontenerGlowny, konternerDolny, kontenerPrzegl¹darki;
     private GridPane kontenerSiatki;
     private HBox kontenerPrzyciskow;
-    private JFXPanel jfxPanel; 
     
-    private ObservableList<String> kraje, polskieMiasta, hiszpañskieMiasta, amerykañskieMiasta;
-    private ComboBox<String> poleKrajów, poleMiast, poleWalut;
+    //private ObservableList<String> kraje, polskieMiasta, hiszpañskieMiasta, amerykañskieMiasta;
+    //private ComboBox<String> poleKrajów, poleMiast, poleWalut;
     private TextArea poleWyszukiwania;
     private Button pobierzPogodê, pobierzKursWaluty, pobierzKursNBP, pobierzOpis;
 
@@ -63,71 +68,6 @@ public class Main extends Application {
         kontenerGlowny = new BorderPane();
         kontenerGlowny.setPadding(new Insets(15, 15, 15, 15));  //tworzy odstêp wokó³ konteneru
         
-        kraje = FXCollections.observableArrayList(
-        		"Poland",
-        		"Spain",
-        		"USA");
-
-        polskieMiasta = FXCollections.observableArrayList(
-                "Cracow",
-                "Poznañ",
-                "Warsaw");
-
-        hiszpañskieMiasta = FXCollections.observableArrayList(
-        		"Barcelona",
-                "Madrid",
-                "Seville");
-
-        amerykañskieMiasta = FXCollections.observableArrayList(
-                "Chicago",
-                "New York",
-                "Washington");
-        
-        poleKrajów = new ComboBox(kraje);
-        
-        poleMiast = new ComboBox();
-        poleKrajów.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
-            @Override
-            public void changed(ObservableValue ov, Object t, Object t1) {
-
-                switch (t1.toString()) {
-                	case "Poland":
-                    	poleMiast.setItems(polskieMiasta);
-                        break;
-                	case "Spain":
-                		poleMiast.setItems(hiszpañskieMiasta);
-                        break;
-                    case "USA":
-                	   poleMiast.setItems(amerykañskieMiasta);
-                       break;
-                }
-            }
-        });
-        
-        poleWalut = new ComboBox();
-        poleWalut.getItems().addAll(                
-                "CHF",
-                "CZK",
-                "JPY",
-                "PLN",
-                "USD"     
-        	);
-        
-        kontenerSiatki = new GridPane();
-        kontenerSiatki.setVgap(4);
-        kontenerSiatki.setHgap(8);
-        kontenerSiatki.setPadding(new Insets(5, 5, 5, 5));
-        kontenerSiatki.add(new Label("Kraj: "), 0, 0);
-        kontenerSiatki.add(poleKrajów, 0, 1);
-        kontenerSiatki.add(new Label("Miasto: "), 1, 0);
-        kontenerSiatki.add(poleMiast, 1, 1);
-        kontenerSiatki.add(new Label("Waluta: "), 4, 0);
-        kontenerSiatki.add(poleWalut, 4, 1); 
-        
-        kontenerSiatki.setPadding(new Insets(0, 0, 10, 0));  // tworzy odstêp pod kontenerem
-        
-        kontenerGlowny.setTop(kontenerSiatki);
-        
         poleWyszukiwania = new TextArea();
         kontenerGlowny.setCenter(poleWyszukiwania);
         
@@ -147,39 +87,30 @@ public class Main extends Application {
         kontenerPrzyciskow.getChildren().add(pobierzOpis);
         
         pobierzPogodê.setOnAction((event) -> {	
-        	if (poleMiast.getSelectionModel().isEmpty() == false) {
-        		wyœwietlRaport(sformatujPogodê(new Service().getWeather(poleMiast.getSelectionModel().getSelectedItem())));
-        		//wyœwietlRaport(new Service().getWeather(poleMiast.getSelectionModel().getSelectedItem()));
+        	if (weatherJson != null) {
+        		
+        		wyœwietlRaport(sformatujPogodê(weatherJson));
         	}
 		});
         
         pobierzKursWaluty.setOnAction((event) -> {
-        	if (poleKrajów.getSelectionModel().isEmpty() == false && poleWalut.getSelectionModel().isEmpty() == false) {
-        		Double kursWaluty = new Service(poleKrajów.getSelectionModel().getSelectedItem()).getRateFor(poleWalut.getSelectionModel().getSelectedItem());
+        	if (rate1 != null) {
         		
-        		if (kursWaluty != null) {
-        			wyœwietlRaport(kursWaluty.toString());
-        		}
+        		wyœwietlRaport("" + rate1);
         	}
 		});
         
         pobierzKursNBP.setOnAction((event) -> {		    
-        	if (poleKrajów.getSelectionModel().isEmpty() == false && !poleKrajów.getSelectionModel().getSelectedItem().equals("Poland")) {
-        		Double kursNBP = new Service(poleKrajów.getSelectionModel().getSelectedItem()).getNBPRate();
+        	if (rate2 != null) {
         		
-        		if (kursNBP != null) {
-        			wyœwietlRaport(kursNBP.toString());
-        		}
+        		wyœwietlRaport("" + rate2);
         	}
 		});
         
         pobierzOpis.setOnAction((event) -> {		    
-        	if (poleMiast.getSelectionModel().isEmpty() == false) {
-        		String adresStrony = new Service().getWikiDescription(poleMiast.getSelectionModel().getSelectedItem());
-                
-        		if (adresStrony != null) {
-        			silnikStron.load(adresStrony);
-        		}
+        	if (wikiAddress != null) {
+        		
+        		silnikStron.load(wikiAddress);
         	}
 		});
          
@@ -215,7 +146,13 @@ public class Main extends Application {
 
     public static void main(String[] args) { 
     	
-          launch(args);
+        s = new Service("Poland");
+        weatherJson = s.getWeather("Warsaw");
+        rate1 = s.getRateFor("USD");
+        rate2 = s.getNBPRate();
+        wikiAddress = s.getWikiDescription("Cracow");
+    	
+        launch(args);
     }
 
     // =============================================================================
